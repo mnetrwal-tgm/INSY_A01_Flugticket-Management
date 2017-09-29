@@ -1,3 +1,6 @@
+<form action="table.php" method="GET">
+	Flugnummer: <input type="text" name="input"/>
+</form>
 <?php
 $db_host = '';
 $db_user = '';
@@ -37,3 +40,5 @@ else
 }
 $result->close();
 $con->close();
+?>
+<a href="table.php?input=<?php echo &_GET['flightnr']; ?>"> Zur&uuml;ck</a>
