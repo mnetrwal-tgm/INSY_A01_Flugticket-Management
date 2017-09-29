@@ -1,6 +1,12 @@
 <?php
 
-$con = mysqli_connect("localhost","table","password","database");
+$db_host = '';
+$db_user = '';
+$db_pass = '';
+$db_name = '';
+
+
+$con = mysqli_connect($db_host,$db_user,$db_pass,$db_name);
 
 
 // Check connection by checking for errors
@@ -9,7 +15,7 @@ if (mysqli_connect_errno())
     die("Failed to connect to MySQL: " . mysqli_connect_error());
 }
 
-if (!$result = mysqli_query($con,"SELECT * FROM flights where flightnr="+input))
+if (!$result = mysqli_query($con,"SELECT * FROM flights where flightnr="+$_GET['input']))
 {
     die("Error: " . mysqli_error($con));
 }
