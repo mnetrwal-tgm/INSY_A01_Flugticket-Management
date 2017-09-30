@@ -8,19 +8,14 @@ $db_user = '';
 $db_pass = '';
 $db_name = '';
 
-
-$con = mysqli_connect($db_host,$db_user,$db_pass,$db_name);
+$con=new PDO('mysql:host='+$db_host+';dbname='+$db_name+';charset=utf8mb',$db_user,$db_pass)
 
 
 // Check connection by checking for errors
-if (mysqli_connect_errno())
-{
-    die("Failed to connect to MySQL: " . mysqli_connect_error());
-}
-
-if (!$result = mysqli_query($con,"SELECT * FROM flights where flightnr="+$_GET['input']))
-{
-    die("Error: " . mysqli_error($con));
+try{
+	$result= $con->query("SELECT * FROM flights natural join passengers where flightnr="+$_GET['input']+";");
+}catch(PDOException $ex){
+	echo "ERROR:" $ex;
 }
 ?>
 
@@ -36,7 +31,7 @@ if (!$result = mysqli_query($con,"SELECT * FROM flights where flightnr="+$_GET['
 <th>Flugzeugtyp</th>
 </tr>
 <?php
-while($row = mysqli_fetch_array($result))
+foreach($result as $row)
 {
 ?>
 <tr>
@@ -47,10 +42,34 @@ while($row = mysqli_fetch_array($result))
 <td><?php echo $row['destination_time']; ?></td>
 <td><?php echo $row['destination_airport']; ?></td>
 <td><?php echo $row['planetype']; ?></td>
-<td><a href="delete.php?airline=<?php echo $row['airline']; ?>&flightnr=<?php echo $row['flightnr']; ?>&departure_airport=<?php echo $row['departure_airport']; ?>&destination_airport=<?php echo $row['destination_airport']; ?>&planetype=<?php echo $row['planetype']; ?>">Delete</a></td>
+</tr>
+</table>
+<table border='1'>
+<tr>
+<th>Vorname</th>
+<th>Nachname</th>
+<th>Reihe</th>
+<th>Sitz</th>
+<th>Löschen</th>
 </tr>
 <?php
-}
-mysqli_close($con);
+foreach($result as $row)
+{
 ?>
+<tr>
+<td><?php echo $row['firstname']; ?></td>
+<td><?php echo $row['lastname']; ?></td>
+<td><?php echo $row['rownr']; ?></td>
+<td><?php echo $row['seatposition']; ?></td>
+<td><form><input type="button" value="-" onclick="window.location.href='delete.php?id=<?php echo $row['id']; ?>&flightnr=<?php echo $row['flightnr']; ?>'" /></form></td>
+</tr>
 </table>
+<?php
+}
+$count = $result->rowCount();
+$temp = $con->query($con,"SELECT maxseats FROM flights inner join planes on flights.planetype=planes.id where flightnr="+$_GET['input']+";");
+$temp = $temp->fetch(PDO::FETCH_ASSOC:);
+$seats_left = $temp['maxseats']-$count;
+echo "Fluggäste: "+$count+ "</br>Sitze frei: "+$seats_left;
+$con=null;
+?>
