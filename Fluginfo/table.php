@@ -3,47 +3,21 @@
 </form>
 <?php
 
-$db_host = '';
-$db_user = '';
-$db_pass = '';
-$db_name = '';
+$database = include('config.php');
 
-$con=new PDO('mysql:host='+$db_host+';dbname='+$db_name+';charset=utf8mb',$db_user,$db_pass)
+
+$con=new PDO('mysql:host='.$database['host'].';dbname='.$database['name'].';charset=utf8mb',$database['user'],$database['pass']);
 
 
 // Check connection by checking for errors
 try{
-	$result= $con->query("SELECT * FROM flights natural join passengers where flightnr="+$_GET['input']+";");
+	$result= $con->query("SELECT * FROM flights natural join passengers where flightnr=".$_GET['input'].";");
 }catch(PDOException $ex){
-	echo "ERROR:" $ex;
+	echo "ERROR: ".$ex;
 }
 ?>
 
 
-<table border='1'>
-<tr>
-<th>Airline</th>
-<th>Flug Nummer</th>
-<th>Abflugzeit</th>
-<th>Abflugort</th>
-<th>Ankunftszeit</th>
-<th>Ankunftsort</th>
-<th>Flugzeugtyp</th>
-</tr>
-<?php
-foreach($result as $row)
-{
-?>
-<tr>
-<td><?php echo $row['airline']; ?></td>
-<td><?php echo $row['flightnr']; ?></td>
-<td><?php echo $row['departure_time']; ?></td>
-<td><?php echo $row['departure_airport']; ?></td>
-<td><?php echo $row['destination_time']; ?></td>
-<td><?php echo $row['destination_airport']; ?></td>
-<td><?php echo $row['planetype']; ?></td>
-</tr>
-</table>
 <table border='1'>
 <tr>
 <th>Vorname</th>
@@ -67,9 +41,9 @@ foreach($result as $row)
 <?php
 }
 $count = $result->rowCount();
-$temp = $con->query($con,"SELECT maxseats FROM flights inner join planes on flights.planetype=planes.id where flightnr="+$_GET['input']+";");
-$temp = $temp->fetch(PDO::FETCH_ASSOC:);
+$temp = $con->query($con,"SELECT maxseats FROM flights inner join planes on flights.planetype=planes.id where flightnr=".$_GET['input'].";");
+$temp = $temp->fetch(PDO::FETCH_ASSOC);
 $seats_left = $temp['maxseats']-$count;
-echo "Fluggäste: "+$count+ "</br>Sitze frei: "+$seats_left;
+echo "Fluggäste: ".$count. "</br>Sitze frei: ".$seats_left;
 $con=null;
 ?>
