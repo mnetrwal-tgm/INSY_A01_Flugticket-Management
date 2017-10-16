@@ -5,16 +5,13 @@
 
 $database = include('config.php');
 
-
-$con=new PDO('mysql:host='.$database['host'].';dbname='.$database['name'].';charset=utf8mb',$database['user'],$database['pass']);
-
-
 // Check connection by checking for errors
 try{
-	$result= $con->query("SELECT * FROM flights natural join passengers where flightnr=".$_GET['input'].";");
-}catch(PDOException $ex){
-	echo "ERROR: ".$ex;
-}
+    $con=new PDO('mysql:host='.$database['host'].';dbname='.$database['name'].';charset=utf8mb',$database['user'],$database['pass']);
+    $input=$_GET['input'];
+    $temp1= $con->prepare("SELECT * FROM flights natural join passengers where flightnr=(:input)");
+	$temp1->bindParam(":input",$input);
+	$result=$temp1->execute();
 ?>
 
 
@@ -27,8 +24,8 @@ try{
 <th>Löschen</th>
 </tr>
 <?php
-foreach($result as $row)
-{
+    foreach($result as $row)
+    {
 ?>
 <tr>
 <td><?php echo $row['firstname']; ?></td>
@@ -39,11 +36,15 @@ foreach($result as $row)
 </tr>
 </table>
 <?php
+    }
+    $count = $result->rowCount();
+    $temp1 = $con->prepare("SELECT maxseats FROM flights inner join planes on flights.planetype=planes.id where flightnr=(:input)");
+    $temp1->bindParam(":input",$input);
+    $result=$temp1->execute();
+    $seats_left = $result['maxseats']-$count;
+    echo "Fluggäste: ".$count. "</br>Sitze frei: ".$seats_left;
+    $con=null;
+}catch(PDOException $ex){
+    echo "ERROR: ".$ex;
 }
-$count = $result->rowCount();
-$temp = $con->query($con,"SELECT maxseats FROM flights inner join planes on flights.planetype=planes.id where flightnr=".$_GET['input'].";");
-$temp = $temp->fetch(PDO::FETCH_ASSOC);
-$seats_left = $temp['maxseats']-$count;
-echo "Fluggäste: ".$count. "</br>Sitze frei: ".$seats_left;
-$con=null;
 ?>
